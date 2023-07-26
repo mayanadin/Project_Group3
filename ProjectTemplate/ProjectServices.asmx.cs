@@ -6,62 +6,70 @@ using System.Web.Services;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 using System.Data;
+using Org.BouncyCastle.Bcpg;
 
 namespace ProjectTemplate
 {
-	[WebService(Namespace = "http://tempuri.org/")]
-	[WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
-	[System.ComponentModel.ToolboxItem(false)]
-	[System.Web.Script.Services.ScriptService]
+    [WebService(Namespace = "http://tempuri.org/")]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+    [System.ComponentModel.ToolboxItem(false)]
+    [System.Web.Script.Services.ScriptService]
 
-	public class ProjectServices : System.Web.Services.WebService
-	{
-		////////////////////////////////////////////////////////////////////////
-		///replace the values of these variables with your database credentials
-		////////////////////////////////////////////////////////////////////////
-		private string dbID = "sum2023team3";
-		private string dbPass = "sum2023team3";
-		private string dbName = "sum2023team3";
-		////////////////////////////////////////////////////////////////////////
-		
-		////////////////////////////////////////////////////////////////////////
-		///call this method anywhere that you need the connection string!
-		////////////////////////////////////////////////////////////////////////
-		private string getConString() {
-			return "SERVER=107.180.1.16; PORT=3306; DATABASE=" + dbName+"; UID=" + dbID + "; PASSWORD=" + dbPass;
-		}
-		////////////////////////////////////////////////////////////////////////
+    public class ProjectServices : System.Web.Services.WebService
+    {
+        public int id;
+        public string userId;
+        public string password;
+        public string firstName;
+        public string lastName;
+        public string empNumber;
+        ////////////////////////////////////////////////////////////////////////
+        ///replace the values of these variables with your database credentials
+        ////////////////////////////////////////////////////////////////////////
+        private string dbID = "sum2023team3";
+        private string dbPass = "sum2023team3";
+        private string dbName = "sum2023team3";
+        ////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////
+        ///call this method anywhere that you need the connection string!
+        ////////////////////////////////////////////////////////////////////////
+        private string getConString()
+        {
+            return "SERVER=107.180.1.16; PORT=3306; DATABASE=" + dbName + "; UID=" + dbID + "; PASSWORD=" + dbPass;
+        }
+        ////////////////////////////////////////////////////////////////////////
 
 
 
-		/////////////////////////////////////////////////////////////////////////
-		//don't forget to include this decoration above each method that you want
-		//to be exposed as a web service!
-		[WebMethod(EnableSession = true)]
-		/////////////////////////////////////////////////////////////////////////
-		public string TestConnection()
-		{
-			try
-			{
-				string testQuery = "select * from test";
+        /////////////////////////////////////////////////////////////////////////
+        //don't forget to include this decoration above each method that you want
+        //to be exposed as a web service!
+        [WebMethod(EnableSession = true)]
+        /////////////////////////////////////////////////////////////////////////
+        public string TestConnection()
+        {
+            try
+            {
+                string testQuery = "select * from test";
 
-				////////////////////////////////////////////////////////////////////////
-				///here's an example of using the getConString method!
-				////////////////////////////////////////////////////////////////////////
-				MySqlConnection con = new MySqlConnection(getConString());
-				////////////////////////////////////////////////////////////////////////
+                ////////////////////////////////////////////////////////////////////////
+                ///here's an example of using the getConString method!
+                ////////////////////////////////////////////////////////////////////////
+                MySqlConnection con = new MySqlConnection(getConString());
+                ////////////////////////////////////////////////////////////////////////
 
-				MySqlCommand cmd = new MySqlCommand(testQuery, con);
-				MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
-				DataTable table = new DataTable();
-				adapter.Fill(table);
-				return "Success!";
-			}
-			catch (Exception e)
-			{
-				return "Something went wrong, please check your credentials and db name and try again.  Error: "+e.Message;
-			}
-		}
+                MySqlCommand cmd = new MySqlCommand(testQuery, con);
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+                return "Success!";
+            }
+            catch (Exception e)
+            {
+                return "Something went wrong, please check your credentials and db name and try again.  Error: " + e.Message;
+            }
+        }
 
         /////////////////////////////////////////////////////////////////////////
         //don't forget to include this decoration above each method that you want
@@ -84,38 +92,49 @@ namespace ProjectTemplate
                 MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
                 DataTable table = new DataTable();
                 adapter.Fill(table);
-                return "Success!";
+                return "Success";
             }
             catch (Exception e)
             {
                 return "Something went wrong, please check your Employee Number and try again.  Error: " + e.Message;
             }
         }
-
-        public string RequestAccount(string uid, string pass, string empNum)
+        //EXAMPLE OF AN INSERT QUERY WITH PARAMS PASSED IN.  BONUS GETTING THE INSERTED ID FROM THE DB!
+        [WebMethod(EnableSession = true)]
+        public void RequestUserAccount(string uid, string pass, string empNum)
         {
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
             //the only thing fancy about this query is SELECT LAST_INSERT_ID() at the end.  All that
             //does is tell mySql server to return the primary key of the last inserted row.
-            string sqlSelect = "insert into Survey_Users (UName, PWord, EmployeeNumber) " +
-                "values(uid, pass, empNum); SELECT LAST_INSERT_ID();";
+            string userId = uid;
+            string passWord = pass;
+            string empNumber = empNum;
+            string sqlSelect = "insert into sum2023team3.Survey_Users (UName, PWord, EmployeeNumber) values('" + uid + "','" + pass + "','" + empNum + "'); SELECT LAST_INSERT_ID();";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
             MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+            MySqlDataReader MyReader2;
 
             sqlCommand.Parameters.AddWithValue("@idValue", HttpUtility.UrlDecode(uid));
             sqlCommand.Parameters.AddWithValue("@passValue", HttpUtility.UrlDecode(pass));
-            sqlCommand.Parameters.AddWithValue("@fnameValue", HttpUtility.UrlDecode(empNum));
+            sqlCommand.Parameters.AddWithValue("@empNumberValue", HttpUtility.UrlDecode(empNum));
+
             //sqlCommand.Parameters.AddWithValue("@lnameValue", HttpUtility.UrlDecode(lastName));
             //sqlCommand.Parameters.AddWithValue("@emailValue", HttpUtility.UrlDecode(email));
-            return "Success";
+
+            //return pass;
+
             //this time, we're not using a data adapter to fill a data table.  We're just
             //opening the connection, telling our command to "executescalar" which says basically
             //execute the query and just hand me back the number the query returns (the ID, remember?).
             //don't forget to close the connection!
-            //sqlConnection.Open();
+            sqlConnection.Open();
             //we're using a try/catch so that if the query errors out we can handle it gracefully
             //by closing the connection and moving on
+
+            MyReader2 = sqlCommand.ExecuteReader();
+            //while (MyReader2.Read())
+
             /*try
             {
                 int accountID = Convert.ToInt32(sqlCommand.ExecuteScalar());
@@ -126,8 +145,61 @@ namespace ProjectTemplate
             }
             catch (Exception e)
             {
+            }*/
+            sqlConnection.Close();
+        }
+
+        //EXAMPLE OF AN INSERT QUERY WITH PARAMS PASSED IN.  BONUS GETTING THE INSERTED ID FROM THE DB!
+        [WebMethod(EnableSession = true)]
+        public void RequestMgrAccount(string uid, string pass, string empNum)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            //the only thing fancy about this query is SELECT LAST_INSERT_ID() at the end.  All that
+            //does is tell mySql server to return the primary key of the last inserted row.
+            string userId = uid;
+            string passWord = pass;
+            string empNumber = empNum;
+            string sqlSelect = "insert into sum2023team3.Survey_Managers (MgrId, PWord, EmployeeNumber) values('" + uid + "','" + pass + "','" + empNum + "'); SELECT LAST_INSERT_ID();";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+            MySqlDataReader MyReader2;
+
+            sqlCommand.Parameters.AddWithValue("@idValue", HttpUtility.UrlDecode(uid));
+            sqlCommand.Parameters.AddWithValue("@passValue", HttpUtility.UrlDecode(pass));
+            sqlCommand.Parameters.AddWithValue("@empNumberValue", HttpUtility.UrlDecode(empNum));
+
+            //sqlCommand.Parameters.AddWithValue("@lnameValue", HttpUtility.UrlDecode(lastName));
+            //sqlCommand.Parameters.AddWithValue("@emailValue", HttpUtility.UrlDecode(email));
+
+            //return pass;
+
+            //this time, we're not using a data adapter to fill a data table.  We're just
+            //opening the connection, telling our command to "executescalar" which says basically
+            //execute the query and just hand me back the number the query returns (the ID, remember?).
+            //don't forget to close the connection!
+            sqlConnection.Open();
+            //we're using a try/catch so that if the query errors out we can handle it gracefully
+            //by closing the connection and moving on
+
+            MyReader2 = sqlCommand.ExecuteReader();
+            //while (MyReader2.Read())
+
+            /*try
+            {
+                int accountID = Convert.ToInt32(sqlCommand.ExecuteScalar());
+                //here, you could use this accountID for additional queries regarding
+                //the requested account.  Really this is just an example to show you
+                //a query where you get the primary key of the inserted row back from
+                //the database!
             }
-            sqlConnection.Close();*/
+            catch (Exception e)
+            {
+            }*/
+            sqlConnection.Close();
+
+
+
         }
     }
-}
+    }
