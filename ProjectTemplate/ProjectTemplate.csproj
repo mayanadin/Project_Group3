@@ -94,6 +94,8 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="ProjectServices.asmx" />
+    <Content Include="script.js" />
+    <Content Include="Styles.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

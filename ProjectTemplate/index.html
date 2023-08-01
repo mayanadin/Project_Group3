@@ -1,46 +1,74 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8" />
-	<title></title>
-	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<title>Feeback System</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width" minimum-scale=1.0>
+	<link href="./styles.css" type="text/css" rel="stylesheet" />
 
-	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
-	<script type="text/javascript">
-		function TestButtonHandler() {
-			var webMethod = "ProjectServices.asmx/TestConnection";
-			var parameters = "{}";
+</head>
 
-			//jQuery ajax method
-			$.ajax({
-				type: "POST",
-				url: webMethod,
-				data: parameters,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function (msg) {
-					var responseFromServer = msg.d;
-					alert(responseFromServer);
-				},
-				error: function (e) {
-					alert("this code will only execute if javascript is unable to access the webservice");
-				}
-			});
-		}
-	</script>
-	<!--END OF YOUR OWN JAVASCRIPT-->
-
-	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
-	<style>
-
-	</style>
-	<!--END OF YOUR OWN CSS-->
-</head >
 <body>
-	<p><a href="/create_user.html">Click Here to Add User</a></p>
-	<button onclick="javascript: TestButtonHandler();">Click here to test connection!</button>
-	<br>
+	<div id="logonPanel">
 
+		<div class="title">Query Board</div>
+		<div class="login-box">
+			<h2>Login</h2>
+			<form id="logonFormId">
+				<label for="username">Username:</label><br>
+				<input type="text" id="username" name="username" required><br>
+				<label for="password">Password:</label><br>
+				<input type="password" id="password" name="password" required><br>
+				<button type="button" onclick="LogOn(this.form)">Logon</button>
+			</form>
+		</div>
+	</div>
+		<div class="signup">Don't have an account? <a href="#" onclick="showPanel('newAccountPanel')" class="tinyLink">Create one here!</a></div>
+
+	
+	<!---New user account creation-->
+
+	<div id="newAccountPanel" class="contentPanel">
+		<div>
+			<form id="inputFormId">
+				<div class="signup-box">
+					<h2>Create New User Account</h2>
+					<h3>Please enter your employee number:</h3>
+					<input id="empNumber" type="text" placeholder="Employee Number" required autocomplete="off" />
+					<h3>Are you a manager?</h3>
+					<select id="isManager" name="isManager">
+						<option value="No">No</option>
+						<option value="Yes">Yes</option>
+					</select>
+					<button type="button" onclick="isEmployee(this.form)">Submit</button>
+				</div>
+			</form>
+		</div>
+		<div class="signup-box">
+			<h3>Here are your credentials for the Feedback System</h3>
+			<table id="creds">
+				<tr>
+					<td class="results">Username</td>
+					<td class="results">Password</td>
+				</tr>
+				<tr>
+					<td><input type="text" id="userName" disabled autocomplete="off"></td>
+					<td><input type="text" id="passWord" disabled autocomplete="off"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+	<div id="mgrPanel" class="mgrPanel">
+
+	</div>
+
+	<div id="empPanel">
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="./script.js"></script>
 </body>
-</html >
+
+
+</html>
